@@ -1,5 +1,6 @@
 .project
 .classpath
 .springBeans
+.sudopassword
 /target
 /.settings

@@ -42,8 +42,8 @@
         <profile>
             <id>docker</id>
             <properties>
-                <docker.image.name>zakyalvan/spring-boot-docker</docker.image.name>
-                <docker.container.name>spring-boot-docker</docker.container.name>
+                <sudo.password.file>.sudopassword</sudo.password.file>
+                <docker.user.name>zakyalvan</docker.user.name>
             </properties>
             <build>
                 <plugins>
@@ -51,21 +51,27 @@
                         <groupId>org.codehaus.mojo</groupId>
                         <artifactId>exec-maven-plugin</artifactId>
                         <version>1.4.0</version>
+                        <configuration>
+                            <environmentVariables>
+                                <SUDO_PASSWORD_FILE>${sudo.password.file}</SUDO_PASSWORD_FILE>
+                                <DOCKER_USER_NAME>${docker.user.name}</DOCKER_USER_NAME>
+                                <DOCKER_IMAGE_NAME>${project.artifactId}</DOCKER_IMAGE_NAME>
+                                <DOCKER_IMAGE_VERSION>${project.version}</DOCKER_IMAGE_VERSION>
+                            </environmentVariables>
+                        </configuration>
                         <executions>
                             <!-- Build docker image -->
                             <execution>
                                 <id>build-docker-image</id>
-                                <phase>install</phase>
+                                <phase>package</phase>
                                 <goals>
                                     <goal>exec</goal>
                                 </goals>
                                 <configuration>
-                                    <workingDirectory>.</workingDirectory>
-                                    <executable>docker</executable>
+                                    <workingDirectory>${basedir}</workingDirectory>
+                                    <executable>/bin/bash</executable>
                                     <arguments>
-                                        <argument>build</argument>
-                                        <argument>--tag=${docker.image.name}</argument>
-                                        <argument>.</argument>
+                                        <argument>${basedir}/docker/build-image.sh</argument>
                                     </arguments>
                                 </configuration>
                             </execution>
@@ -77,17 +83,24 @@
                                     <goal>exec</goal>
                                 </goals>
                                 <configuration>
-                                    <executable>docker</executable>
+                                    <workingDirectory>${basedir}</workingDirectory>
+                                    <executable>/bin/bash</executable>
                                     <arguments>
-                                        <argument>run</argument>
-                                        <!-- Assign a name to the container -->
-                                        <argument>--name=${docker.container.name}</argument>
-                                        <!-- Detached mode: run the container in the background 
-                                        and print the new container ID -->
-                                        <argument>--detach=true</argument>
-                                        <!-- Publish a container's port to the host -->
-                                        <argument>--publish=8888:8080</argument>
-                                        <argument>${docker.image.name}</argument>
+                                        <argument>${basedir}/docker/run-container.sh</argument>
+                                    </arguments>
+                                </configuration>
+                            </execution>
+                            <execution>
+                                <id>stop-docker-container</id>
+                                <phase>clean</phase>
+                                <goals>
+                                    <goal>exec</goal>
+                                </goals>
+                                <configuration>
+                                    <workingDirectory>${basedir}</workingDirectory>
+                                    <executable>/bin/bash</executable>
+                                    <arguments>
+                                        <argument>${basedir}/docker/stop-container.sh</argument>
                                     </arguments>
                                 </configuration>
                             </execution>
@@ -98,27 +111,24 @@
                                     <goal>exec</goal>
                                 </goals>
                                 <configuration>
-                                    <executable>docker</executable>
+                                    <workingDirectory>${basedir}</workingDirectory>
+                                    <executable>/bin/bash</executable>
                                     <arguments>
-                                        <argument>rm</argument>
-                                        <argument>--force=true</argument>
-                                        <argument>${docker.container.name}</argument>
+                                        <argument>${basedir}/docker/remove-container.sh</argument>
                                     </arguments>
                                 </configuration>
                             </execution>
                             <execution>
-                                <id>remove-docker-images</id>
+                                <id>remove-docker-image</id>
                                 <phase>clean</phase>
                                 <goals>
                                     <goal>exec</goal>
                                 </goals>
                                 <configuration>
-                                    <executable>docker</executable>
+                                    <workingDirectory>${basedir}</workingDirectory>
+                                    <executable>/bin/bash</executable>
                                     <arguments>
-                                        <argument>rmi</argument>
-                                        <argument>--force=true</argument>
-                                        <argument>--no-prune=false</argument>
-                                        <argument>${docker.image.name}</argument>
+                                        <argument>${basedir}/docker/remove-image.sh</argument>
                                     </arguments>
                                 </configuration>
                             </execution>
