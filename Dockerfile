@@ -14,10 +14,10 @@ RUN groupadd -r appgroup && useradd -r -g appgroup webappuser
 USER webappuser
 
 # Copy built jar to image.
-COPY target/spring-boot-docker-1.0-SNAPSHOT.jar /user/webappuser/spring-boot-docker.jar
+COPY target/spring-boot-docker-1.0-SNAPSHOT.jar /home/webappuser/spring-boot-docker.jar
 
 # Set default work directory.
-WORKDIR /user/webappuser/
+WORKDIR /home/webappuser/
 
 # Expose port 8080
 EXPOSE 8080
